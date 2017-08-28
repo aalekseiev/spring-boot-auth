@@ -1,0 +1,44 @@
+buildscript {
+	ext {
+		springBootVersion = '1.5.4.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+}
+
+bootRun {
+    addResources = true
+    if (project.hasProperty("debug") && project.debug) {
+        jvmArgs = ["-Xmx256m", "-Xdebug", "-Xrunjdwp:server=y,transport=dt_socket,address=15080,suspend=n"]
+    }
+}
+
+
+dependencies {
+	compile('org.springframework.boot:spring-boot-starter')
+	compile("org.springframework.boot:spring-boot-starter-web")
+	compile("org.springframework.boot:spring-boot-starter-data-jpa")
+	compile("org.springframework.boot:spring-boot-starter-security")
+	compile("io.jsonwebtoken:jjwt:0.7.0")
+	compile("org.hsqldb:hsqldb")
+	
+	compile ('commons-io:commons-io:2.5')
+	
+	
+	testCompile("org.springframework.boot:spring-boot-starter-test")
+}
