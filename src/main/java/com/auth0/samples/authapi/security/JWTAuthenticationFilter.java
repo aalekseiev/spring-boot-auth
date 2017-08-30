@@ -14,12 +14,12 @@ import org.springframework.security.web.csrf.CsrfToken;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.UUID;
 
 import static com.auth0.samples.authapi.security.SecurityConstants.EXPIRATION_TIME;
 import static com.auth0.samples.authapi.security.SecurityConstants.JWT_HEADER_STRING;
@@ -66,7 +66,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .signWith(SignatureAlgorithm.HS512, SECRET)
                 .claim("xsrfToken", csrfToken.getToken())
                 .compact();
-        res.addHeader(JWT_HEADER_STRING, JWT_TOKEN_PREFIX + token);
+		Cookie cookieJwt = new HttpOnlySecureCookie(JWT_HEADER_STRING, JWT_TOKEN_PREFIX + token);
+		res.addCookie(cookieJwt);
         res.addHeader("XSRF-TOKEN", csrfToken.getToken());
     }
 }

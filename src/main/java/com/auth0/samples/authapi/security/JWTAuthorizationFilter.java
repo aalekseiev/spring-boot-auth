@@ -8,6 +8,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -24,24 +25,43 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest req,
+    protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse res,
                                     FilterChain chain) throws IOException, ServletException {
-        String header = req.getHeader(JWT_HEADER_STRING);
+//        String header = request.getHeader(JWT_HEADER_STRING);
+        
+        String header = null;
+    	if (request.getCookies() != null) {
+	    	for (Cookie cookie : request.getCookies()) {
+	    		if (SecurityConstants.JWT_HEADER_STRING.equals(cookie.getName())) {
+	    			header = cookie.getValue();
+	    			break;
+	    		}
+	    	}
+    	}
 
         if (header == null || !header.startsWith(JWT_TOKEN_PREFIX)) {
-            chain.doFilter(req, res);
+            chain.doFilter(request, res);
             return;
         }
 
-        UsernamePasswordAuthenticationToken authentication = getAuthentication(req);
+        UsernamePasswordAuthenticationToken authentication = getAuthentication(request);
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        chain.doFilter(req, res);
+        chain.doFilter(request, res);
     }
 
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
-        String token = request.getHeader(JWT_HEADER_STRING);
+        String token = null;
+    	if (request.getCookies() != null) {
+	    	for (Cookie cookie : request.getCookies()) {
+	    		if (SecurityConstants.JWT_HEADER_STRING.equals(cookie.getName())) {
+	    			token = cookie.getValue();
+	    			break;
+	    		}
+	    	}
+    	}
+        
         if (token != null) {
             // parse the token.
             String user = Jwts.parser()

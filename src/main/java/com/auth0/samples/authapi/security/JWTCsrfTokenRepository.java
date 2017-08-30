@@ -12,6 +12,7 @@ import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.csrf.DefaultCsrfToken;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -48,7 +49,17 @@ public class JWTCsrfTokenRepository implements CsrfTokenRepository {
 
     @Override
     public CsrfToken loadToken(HttpServletRequest request) {
-    	String jwtHeader = request.getHeader(SecurityConstants.JWT_HEADER_STRING);
+    	
+    	String jwtHeader = null;
+    	if (request.getCookies() != null) {
+	    	for (Cookie cookie : request.getCookies()) {
+	    		if (SecurityConstants.JWT_HEADER_STRING.equals(cookie.getName())) {
+	    			jwtHeader = cookie.getValue();
+	    			break;
+	    		}
+	    	}
+    	}
+
     	if (jwtHeader == null || "GET".equals(request.getMethod())) {
             return null;
         }
