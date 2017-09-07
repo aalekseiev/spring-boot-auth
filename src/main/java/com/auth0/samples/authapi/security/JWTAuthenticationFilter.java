@@ -66,7 +66,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .signWith(SignatureAlgorithm.HS512, SECRET)
                 .claim("xsrfToken", csrfToken.getToken())
                 .compact();
-		Cookie cookieJwt = new HttpOnlySecureCookie(JWT_HEADER_STRING, JWT_TOKEN_PREFIX + token);
+		Cookie cookieJwt = new HttpOnlySecureCookie(JWT_HEADER_STRING, token);
 		res.addCookie(cookieJwt);
         res.addHeader("XSRF-TOKEN", csrfToken.getToken());
     }

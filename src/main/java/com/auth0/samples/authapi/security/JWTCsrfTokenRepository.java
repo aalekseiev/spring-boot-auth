@@ -63,7 +63,7 @@ public class JWTCsrfTokenRepository implements CsrfTokenRepository {
     	if (jwtHeader == null || "GET".equals(request.getMethod())) {
             return null;
         }
-    	String jwtString = jwtHeader.split(SecurityConstants.JWT_TOKEN_PREFIX)[1];
+    	String jwtString = jwtHeader;
     	try {
     		Jws<Claims> parseClaimsJws = Jwts.parser()
     				.setSigningKey(SecurityConstants.SECRET)
