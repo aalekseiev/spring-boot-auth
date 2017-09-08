@@ -30,17 +30,17 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
                                     FilterChain chain) throws IOException, ServletException {
 //        String header = request.getHeader(JWT_HEADER_STRING);
         
-        String header = null;
+        String authorizationCookie = null;
     	if (request.getCookies() != null) {
 	    	for (Cookie cookie : request.getCookies()) {
 	    		if (SecurityConstants.JWT_HEADER_STRING.equals(cookie.getName())) {
-	    			header = cookie.getValue();
+	    			authorizationCookie = cookie.getValue();
 	    			break;
 	    		}
 	    	}
     	}
 
-        if (header == null || !header.startsWith(JWT_TOKEN_PREFIX)) {
+        if (authorizationCookie == null/* || !header.startsWith(JWT_TOKEN_PREFIX)*/) {
             chain.doFilter(request, res);
             return;
         }

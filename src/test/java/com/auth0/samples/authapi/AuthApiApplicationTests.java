@@ -35,7 +35,7 @@ import org.hamcrest.CoreMatchers;
 
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {Application.class})
+@SpringBootTest(classes = {AuthorizationServerApplication.class})
 @WebAppConfiguration
 public class AuthApiApplicationTests {
 
