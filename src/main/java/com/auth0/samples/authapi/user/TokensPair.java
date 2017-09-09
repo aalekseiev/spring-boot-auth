@@ -8,7 +8,7 @@ public class TokensPair {
 
 	private String refreshToken;
 
-	private CsrfToken csrfToken;
+	private String csrfToken;
 
 	public String getJwt() {
 		return jwt;
@@ -26,11 +26,11 @@ public class TokensPair {
 		this.refreshToken = refreshToken;
 	}
 
-	public CsrfToken getCsrfToken() {
+	public String getCsrfToken() {
 		return csrfToken;
 	}
 
-	public void setCsrfToken(CsrfToken csrfToken) {
+	public void setCsrfToken(String csrfToken) {
 		this.csrfToken = csrfToken;
 	}
 
@@ -38,7 +38,7 @@ public class TokensPair {
 
 	}
 
-	public TokensPair(String jwt, String refreshToken, CsrfToken csrfToken) {
+	public TokensPair(String jwt, String refreshToken, String csrfToken) {
 		super();
 		this.jwt = jwt;
 		this.refreshToken = refreshToken;

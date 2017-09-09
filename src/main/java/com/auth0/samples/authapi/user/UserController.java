@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.UUID;
 
 import javax.servlet.http.HttpSession;
 
@@ -18,6 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.security.web.csrf.DefaultCsrfToken;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,7 +53,7 @@ public class UserController {
     
     @PostMapping("/token/obtain")
     @ResponseBody
-    public ResponseEntity<TokensPair> token(HttpSession session, @RequestBody ApplicationUser user) {
+    public ResponseEntity<TokensPair> token(@RequestBody ApplicationUser user) {
     	Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                 		user.getUsername(),
@@ -60,14 +62,12 @@ public class UserController {
         );
 
     	if (authentication != null) {
-    		Object attribute = session.getAttribute(DEFAULT_CSRF_TOKEN_ATTR_NAME);
-            CsrfToken csrfToken = (CsrfToken) attribute;
-            
-    		String token = Jwts.builder()
+    		final String csrfToken = UUID.randomUUID().toString().replace("-", "");
+			String token = Jwts.builder()
                     .setSubject(user.getUsername())
                     .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                     .signWith(SignatureAlgorithm.HS512, SECRET)
-                    .claim("xsrfToken", csrfToken.getToken())
+                    .claim("xsrfToken", csrfToken)
                     .compact();
 
     		TokensPair result = new TokensPair(token, "refresh-token-is-not-implemented-yet", csrfToken);

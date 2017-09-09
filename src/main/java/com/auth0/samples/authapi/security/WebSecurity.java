@@ -22,27 +22,16 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-	private CsrfTokenRepository jwtCsrfTokenRepository;
-
     public WebSecurity(UserDetailsService userDetailsService,
-    				   BCryptPasswordEncoder bCryptPasswordEncoder,
-    				   CsrfTokenRepository jwtCsrfTokenRepository) {
+    				   BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userDetailsService = userDetailsService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-        this.jwtCsrfTokenRepository = jwtCsrfTokenRepository;
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().disable()
 	        .csrf().disable();
-//	            .csrfTokenRepository(jwtCsrfTokenRepository)
-//	            .ignoringAntMatchers("/users/**"/*, "/users/token/**"*/)
-	        /*.and()
-        		.authorizeRequests()
-                .antMatchers(HttpMethod.POST, SIGN_UP_URL).permitAll()
-                .antMatchers(HttpMethod.POST, "/users/token/obtain").permitAll()
-                .anyRequest().authenticated()*/;
     }
 
     @Override
