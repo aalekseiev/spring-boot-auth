@@ -35,16 +35,14 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().disable()
-	        .csrf()
-	            .csrfTokenRepository(jwtCsrfTokenRepository)
-	            .ignoringAntMatchers("/login", "/users/sign-up")
-	        .and()
+	        .csrf().disable();
+//	            .csrfTokenRepository(jwtCsrfTokenRepository)
+//	            .ignoringAntMatchers("/users/**"/*, "/users/token/**"*/)
+	        /*.and()
         		.authorizeRequests()
                 .antMatchers(HttpMethod.POST, SIGN_UP_URL).permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .addFilter(new JWTAuthenticationFilter(authenticationManager()))
-                .addFilter(new JWTAuthorizationFilter(authenticationManager()));
+                .antMatchers(HttpMethod.POST, "/users/token/obtain").permitAll()
+                .anyRequest().authenticated()*/;
     }
 
     @Override
@@ -52,10 +50,10 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
     }
 
-  @Bean
-  CorsConfigurationSource corsConfigurationSource() {
-    final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", new CorsConfiguration().applyPermitDefaultValues());
-    return source;
-  }
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+      final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+      source.registerCorsConfiguration("/**", new CorsConfiguration().applyPermitDefaultValues());
+      return source;
+    }
 }
