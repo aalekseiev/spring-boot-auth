@@ -1,5 +1,6 @@
 package com.auth0.samples.authapi.user;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -12,6 +13,9 @@ public class ApplicationUser {
     private long id;
     private String username;
     private String password;
+    
+    @Column
+    private Permissions permissions;
 
     protected ApplicationUser() {
     	
@@ -41,4 +45,13 @@ public class ApplicationUser {
     public void setPassword(String password) {
         this.password = password;
     }
+
+	public Permissions getPermissions() {
+		return permissions;
+	}
+
+	public void setPermissions(Permissions permissions) {
+		this.permissions = permissions;
+	}
+
 }
