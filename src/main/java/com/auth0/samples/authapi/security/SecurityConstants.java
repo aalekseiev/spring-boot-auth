@@ -2,7 +2,7 @@ package com.auth0.samples.authapi.security;
 
 public class SecurityConstants {
 	public static final String SECRET = "SecretKeyToGenJWTs";
-    public static final long EXPIRATION_TIME = 600_000; // 10 minutes
+    public static final long EXPIRATION_TIME = 120_000; // 2 minutes
     public static final String JWT_TOKEN_PREFIX = "Bearer ";
     public static final String JWT_HEADER_STRING = "Authorization";
     public static final String SIGN_UP_URL = "/users/sign-up";

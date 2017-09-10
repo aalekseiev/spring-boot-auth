@@ -47,6 +47,7 @@ public class UserController {
 
     @PostMapping("/sign-up")
     public void signUp(@RequestBody ApplicationUser user) {
+    	System.out.println("Signing up user: " + user);
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         applicationUserRepository.save(user);
     }
@@ -54,6 +55,9 @@ public class UserController {
     @PostMapping("/token/obtain")
     @ResponseBody
     public ResponseEntity<TokensPair> token(@RequestBody ApplicationUser user) {
+    	
+    	System.out.println("Trying to log in as user: " + user);
+    	
     	Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                 		user.getUsername(),
