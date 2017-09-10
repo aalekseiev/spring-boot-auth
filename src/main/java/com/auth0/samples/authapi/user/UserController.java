@@ -46,10 +46,12 @@ public class UserController {
     }
 
     @PostMapping("/sign-up")
-    public void signUp(@RequestBody ApplicationUser user) {
+    @ResponseBody
+    public ResponseEntity<ApplicationUser> signUp(@RequestBody ApplicationUser user) {
     	System.out.println("Signing up user: " + user);
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         applicationUserRepository.save(user);
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
     
     @PostMapping("/token/obtain")
