@@ -23,6 +23,8 @@ public class RefreshToken {
 	private long id;
 
 	private String tokenId;
+	
+	private String jwtId;
 
 	private String body;
 
@@ -38,12 +40,13 @@ public class RefreshToken {
 	    
 	}
 	
-	public RefreshToken(String tokenId, String body, String userName) {
-	    this(tokenId, body, userName, 30 * 60);
+	public RefreshToken(String tokenId, String jwtId, String body, String userName) {
+	    this(tokenId, jwtId, body, userName, 3 * 60);
     }
 	
-	public RefreshToken(String tokenId, String body, String userName, Integer ttlMinutes) {
+	public RefreshToken(String tokenId, String jwtId, String body, String userName, Integer ttlMinutes) {
 	    this.tokenId = tokenId;
+	    this.jwtId = jwtId;
 	    this.body = body;
         this.userId = userName;
         this.validUntil = LocalDateTime.now().plus(ttlMinutes, ChronoUnit.SECONDS);
@@ -63,6 +66,14 @@ public class RefreshToken {
 
 	public void setTokenId(String tokenId) {
 		this.tokenId = tokenId;
+	}
+
+	public String getJwtId() {
+		return jwtId;
+	}
+
+	public void setJwtId(String jwtId) {
+		this.jwtId = jwtId;
 	}
 
 	public String getBody() {
@@ -91,10 +102,10 @@ public class RefreshToken {
         this.validUntil = validUntil;
     }
     
-    public RefreshToken refresh() {
+    public RefreshToken refresh(String newJwtId) {
         repo.delete(id);
         if (validUntil.isAfter(LocalDateTime.now())) {
-            RefreshToken refreshToken = new RefreshToken(new TokenIdSource().generatedId(), "body-not-implemented-yet", userId);
+            RefreshToken refreshToken = new RefreshToken(new TokenIdSource().generatedId(), newJwtId, "body-not-implemented-yet", userId);
             repo.save(refreshToken);
             return refreshToken;
         } else {

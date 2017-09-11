@@ -1,5 +1,7 @@
 package com.auth0.samples.authapi.user;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +46,7 @@ public class TokenController {
     
     @PostMapping("/obtain")
     @ResponseBody
-    public ResponseEntity<TokensDto> tokenObtain(@RequestBody ApplicationUserDto userDto) {
+    public ResponseEntity<TokensDto> tokenObtain(@RequestBody ApplicationUserDto userDto, HttpServletRequest request) {
     	
     	System.out.println("Trying to log in as user: " + userDto);
     	
@@ -56,10 +58,12 @@ public class TokenController {
     	
     	if (authentication != null) {
     	    final CsrfToken csrfToken = new CsrfToken();
-    	    final JsonWebToken jwt = new JsonWebToken(authentication.getName(), authentication.getAuthorities(), csrfToken);
-    	    RefreshToken refreshToken = new RefreshToken(new TokenIdSource().generatedId(), "body-not-implemented-yet", jwt.userName());
+    	    
+    	    final JsonWebToken jwt = new JsonWebToken(authentication.getName(), authentication.getAuthorities(), csrfToken.toString(), request.getRemoteAddr());
+    	    
+    	    final RefreshToken refreshToken = new RefreshToken(new TokenIdSource().generatedId(), jwt.tokenId(), "body-not-implemented-yet", authentication.getName());
             refreshToken.persist();
-
+    	    
     	    TokensDto result = new TokensDto(jwt.toString(), refreshToken.getTokenId(), csrfToken.toString());
 			return new ResponseEntity<>(result, HttpStatus.OK);
     	}
@@ -69,7 +73,7 @@ public class TokenController {
     
     @PostMapping("/refresh")
     @ResponseBody
-    public ResponseEntity<TokensDto> tokenRefresh(@RequestBody RefreshTokenDto refreshTokenDto) {
+    public ResponseEntity<TokensDto> tokenRefresh(@RequestBody RefreshTokenDto refreshTokenDto, HttpServletRequest request) {
     	
     	System.out.println("Trying to refresh token: " + refreshTokenDto);
     	
@@ -79,14 +83,24 @@ public class TokenController {
     		UserDetails user = userDetailsService.loadUserByUsername(refreshToken.getUserId());
 
     		final CsrfToken csrfToken = new CsrfToken();
-    		final JsonWebToken jwt = new JsonWebToken(user.getUsername(), user.getAuthorities(), csrfToken);
+    		
+    		final JsonWebToken currentJwt = JsonWebToken.ofStringIgnoringExpiration(refreshTokenDto.getJwt());
+    		
+    		if (!refreshToken.getJwtId().equals(currentJwt.tokenId())) {
+    			throw new RuntimeException("Provided JWT.rti and RefreshToken's id does not correspond");
+    		}
+    		
+    		final JsonWebToken jwt = new JsonWebToken(user.getUsername(), user.getAuthorities(), csrfToken.toString(), request.getRemoteAddr());
+    		    		
     		RefreshToken newRefreshToken = null;
     		try {
-    		    newRefreshToken = refreshToken.refresh();
+    		    newRefreshToken = refreshToken.refresh(jwt.tokenId());
     		} catch (RuntimeException e) {
     		    LOG.error("Failed to refresh token: {}", e, refreshToken.getTokenId());
     		    return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     		}
+    		
+    		
     		
     		TokensDto result = new TokensDto(jwt.toString(), newRefreshToken.getTokenId(), csrfToken.toString());
     		return new ResponseEntity<>(result, HttpStatus.OK);
