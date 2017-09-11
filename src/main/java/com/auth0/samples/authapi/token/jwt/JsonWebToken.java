@@ -20,6 +20,12 @@ import io.jsonwebtoken.SignatureAlgorithm;
 
 public final class JsonWebToken {
 	
+	private static final String IP = "ip";
+
+	private static final String PERMISSIONS = "permissions";
+
+	private static final String XSRF_TOKEN = "xsrfToken";
+
 	private final String tokenId;
 	
 	private final JwtUserRelatedParameters userInfo;
@@ -66,9 +72,9 @@ public final class JsonWebToken {
                 .setIssuedAt(new Date(timingInfo.issuingDateTime()))
                 .setExpiration(new Date(timingInfo.expirationDateTime()))
                 .signWith(SignatureAlgorithm.HS512, SECRET)
-                .claim("ip", userInfo.ip())
-                .claim("xsrfToken", csrfToken)
-                .claim("permissions", userInfo.authorities()
+                .claim(IP, userInfo.ip())
+                .claim(XSRF_TOKEN, csrfToken)
+                .claim(PERMISSIONS, userInfo.authorities()
                                     .stream()
                                       .map(GrantedAuthority::getAuthority)
                                       .map(String::trim)
@@ -88,7 +94,7 @@ public final class JsonWebToken {
 		}
 		
 		List<GrantedAuthority> permissions = new ArrayList<>();
-		for (Object curPermission : claims.get("permissions", List.class)) {
+		for (Object curPermission : claims.get(PERMISSIONS, List.class)) {
 			GrantedAuthority grantedAuthority = new SimpleGrantedAuthority((String) curPermission);
 			permissions.add(grantedAuthority);
 		}
@@ -96,10 +102,10 @@ public final class JsonWebToken {
 			       new JwtUserRelatedParameters(
 				       claims.getSubject(),
 					   (Collection<? extends GrantedAuthority>)permissions,
-					   claims.get("ip", String.class)
+					   claims.get(IP, String.class)
 				   ),
 			       claims.getId(),
-			       claims.get("csrfToken", String.class),
+			       claims.get(XSRF_TOKEN, String.class),
 			       new JwtTimingInfo(
 				       claims.getIssuedAt().getTime(),
 				       claims.getExpiration().getTime() - claims.getIssuedAt().getTime()
