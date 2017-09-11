@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.auth0.samples.authapi.token.RefreshToken;
-import com.auth0.samples.authapi.token.RefreshTokenRepository;
+import com.auth0.samples.authapi.token.RefreshTokenService;
 import com.auth0.samples.authapi.token.dto.RefreshTokenDto;
 import com.auth0.samples.authapi.user.dto.ApplicationUserDto;
 
@@ -27,16 +27,16 @@ public class TokenController {
 
     private AuthenticationManager authenticationManager;
     
-    private RefreshTokenRepository refreshTokenRepository;
+    private RefreshTokenService refreshTokenService;
     
     private UserDetailsService userDetailsService;
 
     @Autowired
     public TokenController(AuthenticationManager authenticationManager,
-    					   RefreshTokenRepository refreshTokenRepository,
+                           RefreshTokenService refreshTokenService,
     					   UserDetailsService userDetailsService) {
         this.authenticationManager = authenticationManager;
-        this.refreshTokenRepository = refreshTokenRepository;
+        this.refreshTokenService = refreshTokenService;
         this.userDetailsService = userDetailsService;
     }
     
@@ -55,11 +55,11 @@ public class TokenController {
     	if (authentication != null) {
     	    final CsrfToken csrfToken = new CsrfToken();
     	    final JsonWebToken jwt = new JsonWebToken(authentication.getName(), authentication.getAuthorities(), csrfToken);
-    	    final RefreshToken rt = new RefreshToken(new TokenIdSource().generatedId(), "body-not-implemented-yet", jwt.userName());
-            
-    	    refreshTokenRepository.save(rt);
+    	    RefreshToken refreshToken = new RefreshToken(new TokenIdSource().generatedId(), "body-not-implemented-yet", jwt.userName());
+            refreshToken.persist();
     	    
-    	    TokensDto result = new TokensDto(jwt.toString(), rt.getTokenId(), csrfToken.toString());
+    	    
+    	    TokensDto result = new TokensDto(jwt.toString(), refreshToken.getTokenId(), csrfToken.toString());
 			return new ResponseEntity<>(result, HttpStatus.OK);
     	}
     	
@@ -72,18 +72,16 @@ public class TokenController {
     	
     	System.out.println("Trying to refresh token: " + refreshTokenDto);
     	
-    	RefreshToken refreshToken = refreshTokenRepository.findByTokenId(refreshTokenDto.getTokenId());
+    	RefreshToken refreshToken = refreshTokenService.findByTokenId(refreshTokenDto.getTokenId());
     	
     	if (refreshToken != null) {
     		UserDetails user = userDetailsService.loadUserByUsername(refreshToken.getUserId());
-    		
+
     		final CsrfToken csrfToken = new CsrfToken();
     		final JsonWebToken jwt = new JsonWebToken(user.getUsername(), user.getAuthorities(), csrfToken);
-    		final RefreshToken rt = new RefreshToken(new TokenIdSource().generatedId(), "body-not-implemented-yet", jwt.userName());
-            
-    		refreshTokenRepository.save(rt);
+    		final RefreshToken newRefreshToken = refreshToken.refresh();
     		
-    		TokensDto result = new TokensDto(jwt.toString(), rt.getTokenId(), csrfToken.toString());
+    		TokensDto result = new TokensDto(jwt.toString(), newRefreshToken.getTokenId(), csrfToken.toString());
     		return new ResponseEntity<>(result, HttpStatus.OK);
     	}
     	
