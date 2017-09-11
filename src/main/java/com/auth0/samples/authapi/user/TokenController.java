@@ -1,7 +1,5 @@
 package com.auth0.samples.authapi.user;
 
-import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,8 +55,7 @@ public class TokenController {
     	    final JsonWebToken jwt = new JsonWebToken(authentication.getName(), authentication.getAuthorities(), csrfToken);
     	    RefreshToken refreshToken = new RefreshToken(new TokenIdSource().generatedId(), "body-not-implemented-yet", jwt.userName());
             refreshToken.persist();
-    	    
-    	    
+
     	    TokensDto result = new TokensDto(jwt.toString(), refreshToken.getTokenId(), csrfToken.toString());
 			return new ResponseEntity<>(result, HttpStatus.OK);
     	}
@@ -79,7 +76,12 @@ public class TokenController {
 
     		final CsrfToken csrfToken = new CsrfToken();
     		final JsonWebToken jwt = new JsonWebToken(user.getUsername(), user.getAuthorities(), csrfToken);
-    		final RefreshToken newRefreshToken = refreshToken.refresh();
+    		RefreshToken newRefreshToken = null;
+    		try {
+    		    newRefreshToken = refreshToken.refresh();
+    		} catch (RuntimeException e) {
+    		    return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    		}
     		
     		TokensDto result = new TokensDto(jwt.toString(), newRefreshToken.getTokenId(), csrfToken.toString());
     		return new ResponseEntity<>(result, HttpStatus.OK);

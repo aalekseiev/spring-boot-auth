@@ -8,7 +8,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Transient;
-import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -40,10 +39,14 @@ public class RefreshToken {
 	}
 	
 	public RefreshToken(String tokenId, String body, String userName) {
+	    this(tokenId, body, userName, 30 * 60);
+    }
+	
+	public RefreshToken(String tokenId, String body, String userName, Integer ttlMinutes) {
 	    this.tokenId = tokenId;
 	    this.body = body;
         this.userId = userName;
-        this.validUntil = LocalDateTime.now().plus(5, ChronoUnit.MINUTES);
+        this.validUntil = LocalDateTime.now().plus(ttlMinutes, ChronoUnit.SECONDS);
     }
 
     public long getId() {
@@ -88,7 +91,6 @@ public class RefreshToken {
         this.validUntil = validUntil;
     }
     
-//    @Transactional
     public RefreshToken refresh() {
         repo.delete(id);
         if (validUntil.isAfter(LocalDateTime.now())) {
