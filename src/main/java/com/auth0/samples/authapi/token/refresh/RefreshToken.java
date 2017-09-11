@@ -1,4 +1,4 @@
-package com.auth0.samples.authapi.token;
+package com.auth0.samples.authapi.token.refresh;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -12,7 +12,7 @@ import javax.persistence.Transient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
-import com.auth0.samples.authapi.user.TokenIdSource;
+import com.auth0.samples.authapi.token.TokenIdSource;
 
 @Entity
 @Configurable
@@ -25,6 +25,8 @@ public class RefreshToken {
 	private String tokenId;
 	
 	private String jwtId;
+	
+	private String jwtIp;
 
 	private String body;
 
@@ -40,13 +42,14 @@ public class RefreshToken {
 	    
 	}
 	
-	public RefreshToken(String tokenId, String jwtId, String body, String userName) {
-	    this(tokenId, jwtId, body, userName, 3 * 60);
+	public RefreshToken(String tokenId, String jwtId, String jwtIp, String body, String userName) {
+	    this(tokenId, jwtId, jwtIp, body, userName, 3 * 60);
     }
 	
-	public RefreshToken(String tokenId, String jwtId, String body, String userName, Integer ttlMinutes) {
+	public RefreshToken(String tokenId, String jwtId, String jwtIp, String body, String userName, Integer ttlMinutes) {
 	    this.tokenId = tokenId;
 	    this.jwtId = jwtId;
+	    this.jwtIp = jwtIp;
 	    this.body = body;
         this.userId = userName;
         this.validUntil = LocalDateTime.now().plus(ttlMinutes, ChronoUnit.SECONDS);
@@ -102,14 +105,22 @@ public class RefreshToken {
         this.validUntil = validUntil;
     }
     
-    public RefreshToken refresh(String newJwtId) {
+    public RefreshToken nextRefreshToken(String newJwtId, String newJwtIp) {
         repo.delete(id);
-        if (validUntil.isAfter(LocalDateTime.now())) {
-            RefreshToken refreshToken = new RefreshToken(new TokenIdSource().generatedId(), newJwtId, "body-not-implemented-yet", userId);
+        if (LocalDateTime.now().isAfter(validUntil)) {
+        	throw new RuntimeException("Refresh Token with id=" + tokenId + " has expired");
+        } else if (!jwtIp.equals(newJwtIp)) {
+            throw new RuntimeException("Trying to refresh token from ip: " + newJwtIp + " which was not used to create refresh token");
+        } else {
+        	RefreshToken refreshToken = new RefreshToken(
+        								    new TokenIdSource().generatedId(),
+        								    newJwtId,
+        								    jwtIp,
+        								    "body-not-implemented-yet",
+        								    userId
+        								);
             repo.save(refreshToken);
             return refreshToken;
-        } else {
-            throw new RuntimeException("Refresh Token with id=" + tokenId + " has expired");
         }
     }
 

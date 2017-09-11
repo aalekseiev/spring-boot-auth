@@ -1,4 +1,4 @@
-package com.auth0.samples.authapi.user;
+package com.auth0.samples.authapi.token.dto;
 
 public class TokensDto {
 

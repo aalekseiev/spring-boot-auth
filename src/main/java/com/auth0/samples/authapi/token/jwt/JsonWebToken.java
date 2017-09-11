@@ -1,10 +1,7 @@
-package com.auth0.samples.authapi.user;
+package com.auth0.samples.authapi.token.jwt;
 
-import static com.auth0.samples.authapi.security.SecurityConstants.EXPIRATION_TIME;
 import static com.auth0.samples.authapi.security.SecurityConstants.SECRET;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -15,6 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import com.auth0.samples.authapi.security.SecurityConstants;
+import com.auth0.samples.authapi.token.TokenIdSource;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -23,39 +21,28 @@ import io.jsonwebtoken.SignatureAlgorithm;
 public final class JsonWebToken {
 	
 	private final String tokenId;
+	
+	private final JwtUserRelatedParameters userInfo;
 
-    private final String userName;
-
-    private final Collection<? extends GrantedAuthority> authorities;
-    
     private final String csrfToken;
     
-    private final String ip;
+    private final JwtTimingInfo timingInfo;
 
-    public JsonWebToken(String userName, 
-    		Collection<? extends GrantedAuthority> authorities, 
-
-    		String csrfToken, 
-    		String ip) {
-        super();
-        this.tokenId = new TokenIdSource().generatedId();
-        this.userName = userName;
-        this.authorities = authorities;
-        this.csrfToken = csrfToken;
-        this.ip = ip;
+    public JsonWebToken(JwtUserRelatedParameters jwtUserInfo, 
+    		String csrfToken,
+    		JwtTimingInfo jwtTimingInfo) {
+        this(jwtUserInfo, new TokenIdSource().generatedId(), csrfToken, jwtTimingInfo);
     }
     
-    public JsonWebToken(String tokenId, String userName, 
-    		Collection<? extends GrantedAuthority> authorities, 
-
-    		String csrfToken, 
-    		String ip) {
+    public JsonWebToken(JwtUserRelatedParameters jwtUserInfo,
+    		String tokenId,
+    		String csrfToken,
+    		JwtTimingInfo jwtTimingInfo) {
         super();
         this.tokenId = tokenId;
-        this.userName = userName;
-        this.authorities = authorities;
+        this.userInfo = jwtUserInfo;
         this.csrfToken = csrfToken;
-        this.ip = ip;
+        this.timingInfo = jwtTimingInfo;
     }
     
     public String tokenId() {
@@ -63,22 +50,25 @@ public final class JsonWebToken {
     }
     
     public String userName() {
-        return this.userName;
+        return this.userInfo.name();
+    }
+    
+    public String ip() {
+    	return this.userInfo.ip();
     }
     
     public String toString() {
-        long curDateTime = System.currentTimeMillis();
 		return Jwts.builder()
-                .setSubject(userName)
+                .setSubject(userInfo.name())
                 .setId(tokenId)
                 .setAudience("rightway.run")
                 .setIssuer("rightway.run")
-                .setIssuedAt(new Date(curDateTime))
-                .setExpiration(new Date(curDateTime  + EXPIRATION_TIME))
+                .setIssuedAt(new Date(timingInfo.issuingDateTime()))
+                .setExpiration(new Date(timingInfo.expirationDateTime()))
                 .signWith(SignatureAlgorithm.HS512, SECRET)
-                .claim("ip", ip)
+                .claim("ip", userInfo.ip())
                 .claim("xsrfToken", csrfToken)
-                .claim("permissions", authorities
+                .claim("permissions", userInfo.authorities()
                                     .stream()
                                       .map(GrantedAuthority::getAuthority)
                                       .map(String::trim)
@@ -102,10 +92,19 @@ public final class JsonWebToken {
 			GrantedAuthority grantedAuthority = new SimpleGrantedAuthority((String) curPermission);
 			permissions.add(grantedAuthority);
 		}
-		return new JsonWebToken(claims.getId(), claims.getSubject(),
-				(Collection<? extends GrantedAuthority>)permissions,
-				claims.get("csrfToken", String.class),
-				claims.get("ip", String.class));
+		return new JsonWebToken(
+			       new JwtUserRelatedParameters(
+				       claims.getSubject(),
+					   (Collection<? extends GrantedAuthority>)permissions,
+					   claims.get("ip", String.class)
+				   ),
+			       claims.getId(),
+			       claims.get("csrfToken", String.class),
+			       new JwtTimingInfo(
+				       claims.getIssuedAt().getTime(),
+				       claims.getExpiration().getTime() - claims.getIssuedAt().getTime()
+				   )
+				);
 	}
 
 }
