@@ -12,4 +12,16 @@ public class RefreshTokenDto {
 		this.tokenId = tokenId;
 	}
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("RefreshTokenDto [");
+        if (tokenId != null) {
+            builder.append("tokenId=");
+            builder.append(tokenId);
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+	
 }
