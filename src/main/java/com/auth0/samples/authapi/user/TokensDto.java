@@ -1,8 +1,6 @@
 package com.auth0.samples.authapi.user;
 
-import org.springframework.security.web.csrf.CsrfToken;
-
-public class TokensPair {
+public class TokensDto {
 
 	private String jwt;
 
@@ -34,11 +32,11 @@ public class TokensPair {
 		this.csrfToken = csrfToken;
 	}
 
-	protected TokensPair() {
+	protected TokensDto() {
 
 	}
 
-	public TokensPair(String jwt, String refreshToken, String csrfToken) {
+	public TokensDto(String jwt, String refreshToken, String csrfToken) {
 		super();
 		this.jwt = jwt;
 		this.refreshToken = refreshToken;

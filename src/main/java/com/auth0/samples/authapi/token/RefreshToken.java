@@ -17,8 +17,18 @@ public class RefreshToken {
 	private String body;
 
 	private String userId;
+	
+	protected RefreshToken() {
+	    
+	}
+	
+	public RefreshToken(String tokenId, String body, String userName) {
+	    this.tokenId = tokenId;
+	    this.body = body;
+        this.userId = userName;
+    }
 
-	public long getId() {
+    public long getId() {
 		return id;
 	}
 
