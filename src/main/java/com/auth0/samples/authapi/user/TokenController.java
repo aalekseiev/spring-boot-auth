@@ -85,9 +85,9 @@ public class TokenController {
     		
     		TokensDto result = new TokensDto(jwt.toString(), newRefreshToken.getTokenId(), csrfToken.toString());
     		return new ResponseEntity<>(result, HttpStatus.OK);
+    	} else {
+    	    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     	}
-    	
-    	return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }
