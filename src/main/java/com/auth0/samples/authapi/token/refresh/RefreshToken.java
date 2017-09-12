@@ -2,7 +2,6 @@ package com.auth0.samples.authapi.token.refresh;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 
 import javax.persistence.Entity;

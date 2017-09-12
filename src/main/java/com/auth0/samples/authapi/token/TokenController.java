@@ -87,8 +87,7 @@ public class TokenController {
     	    						         System.currentTimeMillis(),
     	    						         SecurityConstants.EXPIRATION_TIME
     	    						     ),
-										privateKey,
-										publicKey
+										privateKey
     	    						  );
     	    
     	    final RefreshToken refreshToken = new RefreshToken(
@@ -149,8 +148,8 @@ public class TokenController {
 				    					    System.currentTimeMillis(),
 				    					    SecurityConstants.EXPIRATION_TIME
 				    					),
-										privateKey,
-					publicKey);
+										privateKey
+									);
     		    		
     		RefreshToken newRefreshToken = null;
     		try {
