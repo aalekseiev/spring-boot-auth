@@ -99,6 +99,8 @@ public class TokenController {
     	
     	System.out.println("Trying to refresh token: " + refreshTokenDto);
     	
+    	ResponseEntity<TokensDto> retVal = null;
+    	
     	RefreshToken refreshToken = refreshTokenService.findByTokenId(refreshTokenDto.getTokenId());
     	
     	if (refreshToken != null) {
@@ -108,8 +110,8 @@ public class TokenController {
     		
     		final JsonWebToken currentJwt = JsonWebToken.ofStringIgnoringExpiration(refreshTokenDto.getJwt());
     		
-    		if (!refreshToken.getJwtId().equals(currentJwt.tokenId())) {
-    			throw new RuntimeException("Provided JWT.rti and RefreshToken's id does not correspond");
+    		if (!refreshToken.isConsistentWith(currentJwt)) {
+    			throw new RuntimeException("Provided JWT.rti and RefreshToken's id are not consistent");
     		}
     		
     		final JsonWebToken jwt = new JsonWebToken(
@@ -130,15 +132,18 @@ public class TokenController {
     		    newRefreshToken = refreshToken.nextRefreshToken(jwt.tokenId(), jwt.ip());
     		} catch (RuntimeException e) {
     		    LOG.error("Failed to refresh token: {}", e, refreshToken.getTokenId());
-    		    return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    		    retVal = new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    		    return retVal;
     		}
 
     		TokensDto result = new TokensDto(jwt.toString(), newRefreshToken.getTokenId(), csrfToken.toString());
-    		return new ResponseEntity<>(result, HttpStatus.OK);
+    		retVal = new ResponseEntity<>(result, HttpStatus.OK);
     	} else {
     	    LOG.error("Unable to find refresh token: {}", refreshTokenDto.getTokenId());
-    	    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    	    retVal = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     	}
+    	
+    	return retVal;
     }
 
 }

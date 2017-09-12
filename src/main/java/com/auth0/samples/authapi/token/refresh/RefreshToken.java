@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
 import com.auth0.samples.authapi.token.TokenIdSource;
+import com.auth0.samples.authapi.token.jwt.JsonWebToken;
 
 @Entity
 @Configurable
@@ -127,5 +128,9 @@ public class RefreshToken {
     public void persist() {
         repo.save(this);        
     }
+
+	public boolean isConsistentWith(JsonWebToken currentJwt) {
+		return jwtId.equals(currentJwt.tokenId());
+	}
 	
 }
