@@ -1,0 +1,14 @@
+
+# registers a new user
+curl -H "Content-Type: application/json" -X POST -d '{
+    "username": "admin",
+    "password": "password"
+}' http://localhost:9000/users/sign-up
+
+curl -v -i -X POST -d 'username=admin&password=password' http://localhost:9000/login
+
+curl 'http://localhost:9000/users/token/obtain' -X OPTIONS -H 'Access-Control-Request-Method: POST' -H 'Origin: http://localhost:8080' -H 'Accept-Encoding: gzip, deflate, br' -H 'Accept-Language: ru,uk;q=0.8,en-US;q=0.6,en;q=0.4' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/60.0.3112.113 Chrome/60.0.3112.113 Safari/537.36' -H 'Accept: */*' -H 'Referer: http://localhost:8080/login' -H 'Connection: keep-alive' -H 'Access-Control-Request-Headers: content-type' --compressed
+
+
+
+docker run --name my-custom-nginx-container -p 80:80 -v /home/kseniia/nginx/nginx.conf:/etc/nginx/nginx.conf:ro -v /home/kseniia/nginx/proxy_conf_fragment:/etc/nginx/proxy_conf_fragment:ro -d nginx

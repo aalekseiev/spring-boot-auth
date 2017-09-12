@@ -1,0 +1,11 @@
+version: '2'
+
+services:
+  
+  balancer:
+    build:
+      context: .
+    image: nginx-spring-boot-auth:latest
+    ports:
+     - "80:80"
+    network_mode: "host"
