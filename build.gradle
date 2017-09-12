@@ -47,9 +47,12 @@ dependencies {
 	compile("org.hsqldb:hsqldb")
 	
 	compile ('commons-io:commons-io:2.5')
-	
-	
-	testCompile("org.springframework.boot:spring-boot-starter-test")
+
+    // https://mvnrepository.com/artifact/commons-codec/commons-codec
+    compile group: 'commons-codec', name: 'commons-codec', version: '1.10'
+
+
+    testCompile("org.springframework.boot:spring-boot-starter-test")
 	
 	aspectpath "org.springframework:spring-aspects:4.3.9.RELEASE"
 	
