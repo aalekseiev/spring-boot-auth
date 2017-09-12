@@ -55,6 +55,8 @@ public class TokenController {
     	
     	System.out.println("Trying to log in as user: " + userDto);
     	
+    	ResponseEntity<TokensDto> retVal = null;
+    	
     	Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                 		userDto.getUsername(),
@@ -87,10 +89,12 @@ public class TokenController {
             refreshToken.persist();
     	    
     	    TokensDto result = new TokensDto(jwt.toString(), refreshToken.getTokenId(), csrfToken.toString());
-			return new ResponseEntity<>(result, HttpStatus.OK);
+    	    retVal = new ResponseEntity<>(result, HttpStatus.OK);
+    	} else {
+    		retVal = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     	}
     	
-    	return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    	return retVal;
     }
     
     @PostMapping("/refresh")
@@ -130,14 +134,13 @@ public class TokenController {
     		RefreshToken newRefreshToken = null;
     		try {
     		    newRefreshToken = refreshToken.nextRefreshToken(jwt.tokenId(), jwt.ip());
+    		    TokensDto result = new TokensDto(jwt.toString(), newRefreshToken.getTokenId(), csrfToken.toString());
+        		retVal = new ResponseEntity<>(result, HttpStatus.OK);
     		} catch (RuntimeException e) {
     		    LOG.error("Failed to refresh token: {}", e, refreshToken.getTokenId());
     		    retVal = new ResponseEntity<>(HttpStatus.FORBIDDEN);
-    		    return retVal;
     		}
-
-    		TokensDto result = new TokensDto(jwt.toString(), newRefreshToken.getTokenId(), csrfToken.toString());
-    		retVal = new ResponseEntity<>(result, HttpStatus.OK);
+    		
     	} else {
     	    LOG.error("Unable to find refresh token: {}", refreshTokenDto.getTokenId());
     	    retVal = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
