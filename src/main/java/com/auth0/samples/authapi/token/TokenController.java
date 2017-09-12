@@ -100,7 +100,13 @@ public class TokenController {
     	    								  );
             refreshToken.persist();
     	    
-    	    TokensDto result = new TokensDto(jwt.toString(), refreshToken.getTokenId(), csrfToken.toString());
+    	    TokensDto result = new TokensDto(
+    	    				           jwt.toString(),
+    	    				           refreshToken.getTokenId(),
+    	    				           csrfToken.toString(),
+    	    				           jwt.expiresIn() / 1000,
+    	    				           refreshToken.expiresIn() / 1000
+    	    				   );
     	    retVal = new ResponseEntity<>(result, HttpStatus.OK);
     	} else {
     		retVal = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -149,7 +155,13 @@ public class TokenController {
     		RefreshToken newRefreshToken = null;
     		try {
     		    newRefreshToken = refreshToken.nextRefreshToken(jwt.tokenId(), jwt.ip());
-    		    TokensDto result = new TokensDto(jwt.toString(), newRefreshToken.getTokenId(), csrfToken.toString());
+    		    TokensDto result = new TokensDto(
+    		    				           jwt.toString(),
+    		    				           newRefreshToken.getTokenId(),
+    		    				           csrfToken.toString(),
+    		    				           jwt.expiresIn() / 1000,
+    		    				           newRefreshToken.expiresIn() / 1000
+    		    				   );
         		retVal = new ResponseEntity<>(result, HttpStatus.OK);
     		} catch (RuntimeException e) {
     		    LOG.error("Failed to refresh token: {}", e, refreshToken.getTokenId());
