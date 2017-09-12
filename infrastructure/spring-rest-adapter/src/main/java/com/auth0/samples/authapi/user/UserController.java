@@ -3,6 +3,7 @@ package com.auth0.samples.authapi.user;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -21,6 +22,7 @@ public class UserController {
     private ApplicationUserRepository applicationUserRepository;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    @Autowired
     public UserController(ApplicationUserRepository applicationUserRepository,
                           BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.applicationUserRepository = applicationUserRepository;
@@ -38,8 +40,6 @@ public class UserController {
         permissions.getPermissions().addAll(Arrays.asList(userDto.getPermissions().split(",")));
 		user.setPermissions(permissions);
         applicationUserRepository.save(user);
-        
-        List<ApplicationUser> findAll = applicationUserRepository.findAll();
         
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
