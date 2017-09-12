@@ -12,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -99,7 +100,9 @@ public class TokenController {
     
     @PostMapping("/refresh")
     @ResponseBody
-    public ResponseEntity<TokensDto> tokenRefresh(@RequestBody RefreshTokenDto refreshTokenDto, HttpServletRequest request) {
+    public ResponseEntity<TokensDto> tokenRefresh(
+                                         @CookieValue("Authorization") String authorizationCookie,
+                                         @RequestBody RefreshTokenDto refreshTokenDto, HttpServletRequest request) {
     	
     	System.out.println("Trying to refresh token: " + refreshTokenDto);
     	
@@ -112,7 +115,7 @@ public class TokenController {
 
     		final CsrfToken csrfToken = new CsrfToken();
     		
-    		final JsonWebToken currentJwt = JsonWebToken.ofStringIgnoringExpiration(refreshTokenDto.getJwt());
+    		final JsonWebToken currentJwt = JsonWebToken.ofStringIgnoringExpiration(authorizationCookie);
     		
     		if (!refreshToken.isConsistentWith(currentJwt)) {
     			throw new RuntimeException("Provided JWT.rti and RefreshToken's id are not consistent");

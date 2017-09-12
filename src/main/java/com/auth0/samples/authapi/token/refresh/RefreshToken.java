@@ -132,5 +132,5 @@ public class RefreshToken {
 	public boolean isConsistentWith(JsonWebToken currentJwt) {
 		return jwtId.equals(currentJwt.tokenId());
 	}
-	
+
 }
