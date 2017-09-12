@@ -41,6 +41,7 @@ bootRun {
 dependencies {
 	compile project(':application');
 	compile project(':infrastructure:spring-config');
+	compile project(':infrastructure:spring-data-adapter');
 	compile project(':infrastructure:spring-rest-adapter');
 
 	compile('org.springframework.boot:spring-boot-starter')
