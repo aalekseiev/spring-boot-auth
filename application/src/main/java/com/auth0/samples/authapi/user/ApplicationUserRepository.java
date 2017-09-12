@@ -1,7 +1,11 @@
 package com.auth0.samples.authapi.user;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
 
-public interface ApplicationUserRepository extends JpaRepository<ApplicationUser, Long> {
-    ApplicationUser findByUsername(String username);
+public interface ApplicationUserRepository {
+
+	ApplicationUser findByUsername(String username);
+
+	void save(ApplicationUser user);
+
 }
