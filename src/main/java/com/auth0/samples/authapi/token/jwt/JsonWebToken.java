@@ -118,4 +118,8 @@ public final class JsonWebToken {
 				   ), privateKey, publicKey);
 	}
 
+	public Long expiresIn() {
+		return timingInfo.expirationDateTime() - System.currentTimeMillis();
+	}
+
 }

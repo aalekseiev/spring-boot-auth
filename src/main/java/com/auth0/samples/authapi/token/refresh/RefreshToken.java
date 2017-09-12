@@ -1,6 +1,8 @@
 package com.auth0.samples.authapi.token.refresh;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 
 import javax.persistence.Entity;
@@ -47,13 +49,19 @@ public class RefreshToken {
 	    this(tokenId, jwtId, jwtIp, body, userName, 3 * 60);
     }
 	
-	public RefreshToken(String tokenId, String jwtId, String jwtIp, String body, String userName, Integer ttlMinutes) {
+	public RefreshToken(
+			   String tokenId,
+			   String jwtId,
+			   String jwtIp,
+			   String body,
+			   String userName,
+			   Integer ttlSeconds) {
 	    this.tokenId = tokenId;
 	    this.jwtId = jwtId;
 	    this.jwtIp = jwtIp;
 	    this.body = body;
         this.userId = userName;
-        this.validUntil = LocalDateTime.now().plus(ttlMinutes, ChronoUnit.SECONDS);
+        this.validUntil = LocalDateTime.now().plus(ttlSeconds, ChronoUnit.SECONDS);
     }
 
     public long getId() {
@@ -131,6 +139,10 @@ public class RefreshToken {
 
 	public boolean isConsistentWith(JsonWebToken currentJwt) {
 		return jwtId.equals(currentJwt.tokenId());
+	}
+	
+	public Long expiresIn() {
+		return validUntil.minus(System.currentTimeMillis(), ChronoUnit.MILLIS).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 	}
 
 }

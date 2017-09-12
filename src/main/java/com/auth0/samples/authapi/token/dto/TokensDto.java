@@ -8,6 +8,10 @@ public class TokensDto {
 
 	private String csrfToken;
 
+	private Long jwtExpiresIn;
+
+	private Long refreshTokenExpiresIn;
+
 	public String getJwt() {
 		return jwt;
 	}
@@ -32,15 +36,38 @@ public class TokensDto {
 		this.csrfToken = csrfToken;
 	}
 
+	public Long getJwtExpiresIn() {
+		return jwtExpiresIn;
+	}
+
+	public void setJwtExpiresIn(Long jwtExpiresIn) {
+		this.jwtExpiresIn = jwtExpiresIn;
+	}
+
+	public Long getRefreshTokenExpiresIn() {
+		return refreshTokenExpiresIn;
+	}
+
+	public void setRefreshTokenExpiresIn(Long refreshTokenExpiresIn) {
+		this.refreshTokenExpiresIn = refreshTokenExpiresIn;
+	}
+
 	protected TokensDto() {
 
 	}
 
-	public TokensDto(String jwt, String refreshToken, String csrfToken) {
+	public TokensDto(
+			   String jwt,
+			   String refreshToken,
+			   String csrfToken,
+			   Long jwtExpiresIn,
+			   Long refreshTokenExpiresIn) {
 		super();
 		this.jwt = jwt;
 		this.refreshToken = refreshToken;
 		this.csrfToken = csrfToken;
+		this.jwtExpiresIn = jwtExpiresIn;
+		this.refreshTokenExpiresIn = refreshTokenExpiresIn;
 	}
 
 }
