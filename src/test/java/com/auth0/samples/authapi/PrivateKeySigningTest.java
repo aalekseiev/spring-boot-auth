@@ -28,7 +28,7 @@ public class PrivateKeySigningTest {
 	public void shouldSignJwtToken() {
 		JwtUserRelatedParameters parameters = new JwtUserRelatedParameters("name1", new ArrayList<>(), "");
 		JwtTimingInfo timingInfo = new JwtTimingInfo(System.currentTimeMillis(), 60000L);
-		JsonWebToken jsonWebToken = new JsonWebToken(parameters, "123", timingInfo, privateKey, publicKey);
+		JsonWebToken jsonWebToken = new JsonWebToken(parameters, "123", timingInfo, privateKey);
 		String jwt = jsonWebToken.toString();
 		Assert.assertNotNull(jwt);
 

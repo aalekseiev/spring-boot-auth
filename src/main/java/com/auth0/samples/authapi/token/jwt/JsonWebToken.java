@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import com.auth0.samples.authapi.security.SecurityConstants;
 import com.auth0.samples.authapi.token.TokenIdSource;
 
 import io.jsonwebtoken.Claims;
@@ -35,25 +34,24 @@ public final class JsonWebToken {
     private final JwtTimingInfo timingInfo;
 
 	private final PrivateKey privateRsaKey;
-	private PublicKey publicKey;
 
 	public JsonWebToken(JwtUserRelatedParameters jwtUserInfo,
 						String csrfToken,
-						JwtTimingInfo jwtTimingInfo, PrivateKey privateRsaKey, PublicKey publicKey) {
-        this(jwtUserInfo, new TokenIdSource().generatedId(), csrfToken, jwtTimingInfo, privateRsaKey, publicKey);
+						JwtTimingInfo jwtTimingInfo, PrivateKey privateRsaKey) {
+        this(jwtUserInfo, new TokenIdSource().generatedId(), csrfToken, jwtTimingInfo, privateRsaKey);
 	}
     
     public JsonWebToken(JwtUserRelatedParameters jwtUserInfo,
 						String tokenId,
 						String csrfToken,
-						JwtTimingInfo jwtTimingInfo, PrivateKey privateRsaKey, PublicKey publicKey) {
+						JwtTimingInfo jwtTimingInfo,
+						PrivateKey privateRsaKey) {
         super();
         this.tokenId = tokenId;
         this.userInfo = jwtUserInfo;
         this.csrfToken = csrfToken;
         this.timingInfo = jwtTimingInfo;
 		this.privateRsaKey = privateRsaKey;
-		this.publicKey = publicKey;
 	}
     
     public String tokenId() {
@@ -91,7 +89,6 @@ public final class JsonWebToken {
 		Claims claims = null;
 		try {
 			claims = Jwts.parser()
-//	                .setSigningKey(SecurityConstants.SECRET)
 					.setSigningKey(publicKey)
 	                .parseClaimsJws(jwtString).getBody();
 			
@@ -115,7 +112,7 @@ public final class JsonWebToken {
 			       new JwtTimingInfo(
 				       claims.getIssuedAt().getTime(),
 				       claims.getExpiration().getTime() - claims.getIssuedAt().getTime()
-				   ), privateKey, publicKey);
+				   ), privateKey);
 	}
 
 	public Long expiresIn() {
