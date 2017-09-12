@@ -1,7 +1,7 @@
 package com.auth0.samples.authapi.token.jwt;
 
-import static com.auth0.samples.authapi.security.SecurityConstants.SECRET;
-
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -34,22 +34,27 @@ public final class JsonWebToken {
     
     private final JwtTimingInfo timingInfo;
 
-    public JsonWebToken(JwtUserRelatedParameters jwtUserInfo, 
-    		String csrfToken,
-    		JwtTimingInfo jwtTimingInfo) {
-        this(jwtUserInfo, new TokenIdSource().generatedId(), csrfToken, jwtTimingInfo);
-    }
+	private final PrivateKey privateRsaKey;
+	private PublicKey publicKey;
+
+	public JsonWebToken(JwtUserRelatedParameters jwtUserInfo,
+						String csrfToken,
+						JwtTimingInfo jwtTimingInfo, PrivateKey privateRsaKey, PublicKey publicKey) {
+        this(jwtUserInfo, new TokenIdSource().generatedId(), csrfToken, jwtTimingInfo, privateRsaKey, publicKey);
+	}
     
     public JsonWebToken(JwtUserRelatedParameters jwtUserInfo,
-    		String tokenId,
-    		String csrfToken,
-    		JwtTimingInfo jwtTimingInfo) {
+						String tokenId,
+						String csrfToken,
+						JwtTimingInfo jwtTimingInfo, PrivateKey privateRsaKey, PublicKey publicKey) {
         super();
         this.tokenId = tokenId;
         this.userInfo = jwtUserInfo;
         this.csrfToken = csrfToken;
         this.timingInfo = jwtTimingInfo;
-    }
+		this.privateRsaKey = privateRsaKey;
+		this.publicKey = publicKey;
+	}
     
     public String tokenId() {
     	return this.tokenId;
@@ -71,7 +76,7 @@ public final class JsonWebToken {
                 .setIssuer("rightway.run")
                 .setIssuedAt(new Date(timingInfo.issuingDateTime()))
                 .setExpiration(new Date(timingInfo.expirationDateTime()))
-                .signWith(SignatureAlgorithm.HS512, SECRET)
+				.signWith(SignatureAlgorithm.RS512, privateRsaKey)
                 .claim(IP, userInfo.ip())
                 .claim(XSRF_TOKEN, csrfToken)
                 .claim(PERMISSIONS, userInfo.authorities()
@@ -82,11 +87,12 @@ public final class JsonWebToken {
                 .compact();
     }
 
-	public static JsonWebToken ofStringIgnoringExpiration(String jwtString) {
+	public static JsonWebToken ofStringIgnoringExpiration(String jwtString, PrivateKey privateKey, PublicKey publicKey) {
 		Claims claims = null;
 		try {
 			claims = Jwts.parser()
-	                .setSigningKey(SecurityConstants.SECRET)
+//	                .setSigningKey(SecurityConstants.SECRET)
+					.setSigningKey(publicKey)
 	                .parseClaimsJws(jwtString).getBody();
 			
 		} catch (io.jsonwebtoken.ExpiredJwtException e) {
@@ -109,8 +115,7 @@ public final class JsonWebToken {
 			       new JwtTimingInfo(
 				       claims.getIssuedAt().getTime(),
 				       claims.getExpiration().getTime() - claims.getIssuedAt().getTime()
-				   )
-				);
+				   ), privateKey, publicKey);
 	}
 
 }

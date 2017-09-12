@@ -28,6 +28,9 @@ import com.auth0.samples.authapi.token.refresh.RefreshToken;
 import com.auth0.samples.authapi.token.refresh.RefreshTokenService;
 import com.auth0.samples.authapi.user.dto.ApplicationUserDto;
 
+import java.security.PrivateKey;
+import java.security.PublicKey;
+
 @RestController
 @RequestMapping("/token")
 public class TokenController {
@@ -39,6 +42,12 @@ public class TokenController {
     private RefreshTokenService refreshTokenService;
     
     private UserDetailsService userDetailsService;
+
+    @Autowired
+    private PrivateKey privateKey;
+
+    @Autowired
+    private PublicKey publicKey;
 
     @Autowired
     public TokenController(AuthenticationManager authenticationManager,
@@ -74,7 +83,9 @@ public class TokenController {
     	    						     new JwtTimingInfo(
     	    						         System.currentTimeMillis(),
     	    						         SecurityConstants.EXPIRATION_TIME
-    	    						     )
+    	    						     ),
+										privateKey,
+										publicKey
     	    						  );
     	    
     	    final RefreshToken refreshToken = new RefreshToken(
@@ -106,7 +117,7 @@ public class TokenController {
 
     		final CsrfToken csrfToken = new CsrfToken();
     		
-    		final JsonWebToken currentJwt = JsonWebToken.ofStringIgnoringExpiration(refreshTokenDto.getJwt());
+    		final JsonWebToken currentJwt = JsonWebToken.ofStringIgnoringExpiration(refreshTokenDto.getJwt(), privateKey, publicKey);
     		
     		if (!refreshToken.getJwtId().equals(currentJwt.tokenId())) {
     			throw new RuntimeException("Provided JWT.rti and RefreshToken's id does not correspond");
@@ -122,8 +133,9 @@ public class TokenController {
 				    					new JwtTimingInfo(
 				    					    System.currentTimeMillis(),
 				    					    SecurityConstants.EXPIRATION_TIME
-				    					)
-				    				 );
+				    					),
+										privateKey,
+					publicKey);
     		    		
     		RefreshToken newRefreshToken = null;
     		try {
