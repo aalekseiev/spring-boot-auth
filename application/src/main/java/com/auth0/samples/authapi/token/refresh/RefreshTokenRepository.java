@@ -1,9 +1,11 @@
 package com.auth0.samples.authapi.token.refresh;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
-interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
+public interface RefreshTokenRepository {
 
 	RefreshToken findByTokenId(String tokenId);
-	
+
+	void delete(long id);
+
+	void save(RefreshToken refreshToken);
+
 }
