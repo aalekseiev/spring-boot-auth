@@ -1,0 +1,76 @@
+buildscript {
+	ext {
+		springBootVersion = '1.5.4.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+		maven {
+            url "https://maven.eveoh.nl/content/repositories/releases"
+        }
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath "nl.eveoh:gradle-aspectj:1.6"
+	}
+}
+
+project.ext {
+    aspectjVersion = '1.8.4'
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'aspectj'
+
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+}
+
+
+dependencies {
+	compile project(':application')
+
+	compile('org.springframework.boot:spring-boot-starter')
+	compile("org.springframework.boot:spring-boot-starter-data-jpa")
+	compile("org.hsqldb:hsqldb")
+	
+	compile ('commons-io:commons-io:2.5')
+
+    // https://mvnrepository.com/artifact/commons-codec/commons-codec
+    compile group: 'commons-codec', name: 'commons-codec', version: '1.10'
+
+
+    testCompile("org.springframework.boot:spring-boot-starter-test")
+	
+	aspectpath "org.springframework:spring-aspects:4.3.9.RELEASE"
+	
+	compile("aspectj:aspectjtools:1.5.4")
+}
+
+eclipse {
+    classpath {
+    	downloadJavadoc = true
+    	downloadSources = true
+    }
+    project {
+  	    natures('org.eclipse.ajdt.ui.ajnature')
+  	    buildCommand('org.eclipse.ajdt.core.ajbuilder')
+    }
+    classpath {
+        file {
+            withXml {
+                def node = it.asNode()
+                if (node.children().findAll{it?.attribute('path').contains('ASPECTJRT_CONTAINER')}.size() == 0) {
+                    println "Add aspectjrt to classpath"
+                    node.appendNode('classpathentry', [kind: 'con', path: 'org.eclipse.ajdt.core.ASPECTJRT_CONTAINER'])
+                }
+                node.children().findAll{it?.attribute('path').contains('spring-aspect')}.each {it.children()[0].appendNode('attribute', [name:"org.eclipse.ajdt.aspectpath", value:"org.eclipse.ajdt.aspectpath"])}
+            }
+        }
+    }
+}
+
