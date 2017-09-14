@@ -1,0 +1,4 @@
+include ":application"
+include ":infrastructure:spring-config"
+include ":infrastructure:spring-rest-adapter"
+include ":infrastructure:spring-data-adapter"
